@@ -6,5 +6,46 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-  }
+    "ng-observe": {
+      "projectType": "library",
+      "root": "projects/ng-observe",
+      "sourceRoot": "projects/ng-observe/src",
+      "prefix": "ng-observe",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "projects/ng-observe/tsconfig.lib.json",
+            "project": "projects/ng-observe/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ng-observe/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/ng-observe/src/test.ts",
+            "tsConfig": "projects/ng-observe/tsconfig.spec.json",
+            "karmaConfig": "projects/ng-observe/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/ng-observe/tsconfig.lib.json",
+              "projects/ng-observe/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "ng-observe"
 }
