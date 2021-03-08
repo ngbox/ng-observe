@@ -1,4 +1,12 @@
-# NgObserve
+<p align="center">
+  <br />&nbsp;<br />
+  <img alt="ng-observe logo" src="https://user-images.githubusercontent.com/15855540/110312130-c1431680-8015-11eb-82eb-29f792beb6bc.png" width="192" align="middle" />
+</p>
+<h1 align="center">
+  ng-observe
+  <br />&nbsp;<br />
+</h1>
+
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.3.
 
