@@ -1,3 +1,6 @@
+<img alt="ng-observe logo" src="https://user-images.githubusercontent.com/15855540/110310285-6ad4d880-8013-11eb-9250-35da49da332a.png" style="display:inline-block;margin-left:calc(50% - 64px);width:128px">
+
+
 # NgObserve
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.3.
