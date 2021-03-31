@@ -7,25 +7,28 @@
   <br />&nbsp;<br />
 </h1>
 
-
-Angular reactivity redefined
+Angular reactivity streamlined...
 
 ### Why?
-  - Unlike async pipe, you can use it in the component class and even in directives
-  - Feels more reactive than unsubscribing on destroy (be it handled by a decorator, triggered by a subject, or done by a direct call in lifecycle hook)
-  - Reduces the complexity of working with streams
+
+- Unlike [AsyncPipe](https://angular.io/api/common/AsyncPipe), you can use it in component classes and even in directives.
+- Feels more reactive than unsubscribing on destroy (be it handled by a decorator, triggered by a subject, or done by a direct call in the lifecycle hook).
+- Reduces the complexity of working with streams.
 
 ### How it works
-- Extracts emitted value from observables
-- Triggers change detection
-- Leaves no subscription behind
-- Clears old subscriptions and create new ones at each execution if used in getters, setters or methods 
+
+- Extracts emitted value from observables.
+- Triggers change detection.
+- Leaves no subscription behind.
+- Clears old subscriptions and creates new ones at each execution if used in getters, setters or methods.
 
 ### Example
-We can subscribe to stream with angular's `AsyncPipe` in component templates. But we can't use `AsyncPipe` in component class or directice class.
+
+We can subscribe to a stream with the `AsyncPipe` in component templates, but we can't use it in component or directive classes.
+
 ```typescript
 @Component({
-  template: '{{fooBar$ | async}}'
+  template: '{{ fooBar$ | async }}',
 })
 class DemoComponent {
   foo$ = of('foo');
@@ -35,13 +38,15 @@ class DemoComponent {
   }
 }
 ```
-With ng observe we don't need to pipe the stream.
+
+With ng-observe, we don't need to pipe the stream.
+
 ```typescript
-import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe'
+import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe';
 
 @Component({
   template: '{{ fooBar }}',
-  providers: [OBSERVE_PROVIDER]
+  providers: [OBSERVE_PROVIDER],
 })
 class DemoComponent {
   foo = this.observe(of('foo'));
@@ -55,13 +60,15 @@ class DemoComponent {
 ```
 
 You can see other examples at links below:
- - [Basic HTTP example](https://stackblitz.com/edit/ng-observe?file=src%2Fapp%2Fapp.ts)
- - [Using with Angular router](https://stackblitz.com/edit/ng-observe-router?file=src%2Fapp%2Fapp.ts)
- - [Using with NgRx](https://stackblitz.com/edit/ng-observe-ngrx?file=src%2Fapp%2Fapp.ts)
 
+- [Basic HTTP example](https://stackblitz.com/edit/ng-observe?file=src%2Fapp%2Fapp.ts)
+- [Using with Angular router](https://stackblitz.com/edit/ng-observe-router?file=src%2Fapp%2Fapp.ts)
+- [Using with NgRx](https://stackblitz.com/edit/ng-observe-ngrx?file=src%2Fapp%2Fapp.ts)
 
 ### API
+
 #### OBSERVE_PROVIDER
+
 To use ng-observe in your components and directives, add `OBSERVE_PROVIDER` to providers array in metadata.
 
 #### ObserveFn
@@ -69,42 +76,45 @@ To use ng-observe in your components and directives, add `OBSERVE_PROVIDER` to p
 This function is used to extract a single stream's value.You can inject it `OBSERVE` injection token.
 
 ```typescript
-import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe'
+import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe';
 
 @Component({
-  template: '{{foo.value}}',
-  providers: [OBSERVE_PROVIDER]
+  template: '{{ foo.value }}',
+  providers: [OBSERVE_PROVIDER],
 })
 class Component {
   foo = this.observe(of('foo'));
-  
+
   constuctor(@Inject(OBSERVE) private observe: ObserveFn) {}
 }
 ```
+
 #### ObserveMapFn
 
 This function is used to extract multiple streams' value.You can inject it `OBSERVE_MAP` injection token.
 
 ```typescript
-import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe'
+import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe';
 
 @Component({
-  template: '{{state.foo}} {{state.bar}}',
-  providers: [OBSERVE_PROVIDER]
+  template: '{{ state.foo }} {{ state.bar }}',
+  providers: [OBSERVE_PROVIDER],
 })
 class Component {
-  state = this.observeMap({foo: of('foo'), bar: of('bar')});
+  state = this.observeMap({ foo: of('foo'), bar: of('bar') });
 
   constuctor(@Inject(OBSERVE_MAP) private observeMap: ObserveMapFn) {}
 }
 ```
+
 Works with arrays too
+
 ```typescript
-import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe'
+import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe';
 
 @Component({
-  template: '{{state[0]}} {{state[1]}}',
-  providers: [OBSERVE_PROVIDER]
+  template: '{{ state[0] }} {{ state[1] }}',
+  providers: [OBSERVE_PROVIDER],
 })
 class Component {
   state = this.observeMap([of('foo'), of('bar')]);
@@ -112,39 +122,43 @@ class Component {
   constuctor(@Inject(OBSERVE_MAP) private observeMap: ObserveMapFn) {}
 }
 ```
+
 #### ObserveService
+
 You can use `ObserveService`'s `value` and `map` methods instead of `ObserveFn` and `ObserveMapFn`.
 
 ```typescript
-import { ObserveService } from 'ng-observe'
+import { ObserveService } from 'ng-observe';
 
 @Component({
-  template: '{{foo.value}} {{state[0]}} {{state[1]}}',
-  providers: [ObserveService]
+  template: '{{ foo.value }} {{ state[0] }} {{ state[1] }}',
+  providers: [OBSERVE_PROVIDER],
 })
 class Component {
-  foo = this.observeService.value(of('foo'));
+  foo = this.observe.value(of('foo'));
 
-  state = this.observeService.map([of('foo'), of('bar')]);
-  
-  constuctor(private observeService: ObserveService) {}
+  state = this.observe.map([of('foo'), of('bar')]);
+
+  constuctor(private observe: ObserveService) {}
 }
 ```
 
 #### Observed
-`ObserveFn` infers types for you. If you want to assign observed value later, you can use `Observed` class for type annotation.
+
+`ObserveFn` infers types for you, but if you want to assign observed value later, you can use `Observed` class for type annotation.
+
 ```typescript
-import { OBSERVE, OBSERVE_PROVIDER, Observed } from 'ng-observe'
+import { OBSERVE, OBSERVE_PROVIDER, Observed } from 'ng-observe';
 
 @Component({
-  template: '{{foo.value}}',
-  providers: [OBSERVE_PROVIDER]
+  template: '{{ foo.value }}',
+  providers: [OBSERVE_PROVIDER],
 })
 class Component {
   foo: Observed<string>;
-  
+
   constuctor(@Inject(OBSERVE) private observe: ObserveFn) {
-    this.foo = this.observe(of('foo'))
+    this.foo = this.observe(of('foo'));
   }
 }
 ```
