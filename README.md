@@ -8,28 +8,143 @@
 </h1>
 
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.3.
+Angular reactivity redefined
 
-## Development server
+### Why?
+  - Unlike async pipe, you can use it in the component class and even in directives
+  - Feels more reactive than unsubscribing on destroy (be it handled by a decorator, triggered by a subject, or done by a direct call in lifecycle hook)
+  - Reduces the complexity of working with streams
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+### How it works
+- Extracts emitted value from observables
+- Triggers change detection
+- Leaves no subscription behind
+- Clears old subscriptions and create new ones at each execution if used in getters, setters or methods 
 
-## Code scaffolding
+### Example
+We can subscribe to stream with angular's `AsyncPipe` in component templates. But we can't use `AsyncPipe` in component class or directice class.
+```typescript
+@Component({
+  template: '{{fooBar$ | async}}'
+})
+class DemoComponent {
+  foo$ = of('foo');
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+  get fooBar$() {
+    return foo$.pipe(map(val => val + 'bar'));
+  }
+}
+```
+With ng observe we don't need to pipe the stream.
+```typescript
+import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe'
 
-## Build
+@Component({
+  template: '{{ fooBar }}',
+  providers: [OBSERVE_PROVIDER]
+})
+class DemoComponent {
+  foo = this.observe(of('foo'));
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+  get fooBar() {
+    return this.foo.value + 'bar';
+  }
 
-## Running unit tests
+  constuctor(@Inject(OBSERVE) private observe: ObserveFn) {}
+}
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+You can see other examples at links below:
+ - [Basic HTTP example](https://stackblitz.com/edit/ng-observe?file=src%2Fapp%2Fapp.ts)
+ - [Using with Angular router](https://stackblitz.com/edit/ng-observe-router?file=src%2Fapp%2Fapp.ts)
+ - [Using with NgRx](https://stackblitz.com/edit/ng-observe-ngrx?file=src%2Fapp%2Fapp.ts)
 
-## Running end-to-end tests
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+### API
+#### OBSERVE_PROVIDER
+To use ng-observe in your components and directives, add `OBSERVE_PROVIDER` to providers array in metadata.
 
-## Further help
+#### ObserveFn
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+This function is used to extract a single stream's value.You can inject it `OBSERVE` injection token.
+
+```typescript
+import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe'
+
+@Component({
+  template: '{{foo.value}}',
+  providers: [OBSERVE_PROVIDER]
+})
+class Component {
+  foo = this.observe(of('foo'));
+  
+  constuctor(@Inject(OBSERVE) private observe: ObserveFn) {}
+}
+```
+#### ObserveMapFn
+
+This function is used to extract multiple streams' value.You can inject it `OBSERVE_MAP` injection token.
+
+```typescript
+import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe'
+
+@Component({
+  template: '{{state.foo}} {{state.bar}}',
+  providers: [OBSERVE_PROVIDER]
+})
+class Component {
+  state = this.observeMap({foo: of('foo'), bar: of('bar')});
+
+  constuctor(@Inject(OBSERVE_MAP) private observeMap: ObserveMapFn) {}
+}
+```
+Works with arrays too
+```typescript
+import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe'
+
+@Component({
+  template: '{{state[0]}} {{state[1]}}',
+  providers: [OBSERVE_PROVIDER]
+})
+class Component {
+  state = this.observeMap([of('foo'), of('bar')]);
+
+  constuctor(@Inject(OBSERVE_MAP) private observeMap: ObserveMapFn) {}
+}
+```
+#### ObserveService
+You can use `ObserveService`'s `value` and `map` methods instead of `ObserveFn` and `ObserveMapFn`.
+
+```typescript
+import { ObserveService } from 'ng-observe'
+
+@Component({
+  template: '{{foo.value}} {{state[0]}} {{state[1]}}',
+  providers: [ObserveService]
+})
+class Component {
+  foo = this.observeService.value(of('foo'));
+
+  state = this.observeService.map([of('foo'), of('bar')]);
+  
+  constuctor(private observeService: ObserveService) {}
+}
+```
+
+#### Observed
+`ObserveFn` infers types for you. If you want to assign observed value later, you can use `Observed` class for type annotation.
+```typescript
+import { OBSERVE, OBSERVE_PROVIDER, Observed } from 'ng-observe'
+
+@Component({
+  template: '{{foo.value}}',
+  providers: [OBSERVE_PROVIDER]
+})
+class Component {
+  foo: Observed<string>;
+  
+  constuctor(@Inject(OBSERVE) private observe: ObserveFn) {
+    this.foo = this.observe(of('foo'))
+  }
+}
+```
