@@ -5,9 +5,7 @@ import {
   OBSERVE,
   Observed,
   ObserveFn,
-  ObserveMapFn,
   ObserveService,
-  OBSERVE_MAP,
   OBSERVE_PROVIDER,
 } from './ng-observe';
 
@@ -16,7 +14,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [OBSERVE_PROVIDER],
 })
-export class ObserveFnTestComponent {
+export class ObserveValueFnTestComponent {
   observe: ObserveFn;
   text: Observed<string>;
   text$ = new BehaviorSubject('Foo');
@@ -32,17 +30,17 @@ export class ObserveFnTestComponent {
 }
 
 describe('Observe', () => {
-  let component: ObserveFnTestComponent;
-  let fixture: ComponentFixture<ObserveFnTestComponent>;
+  let component: ObserveValueFnTestComponent;
+  let fixture: ComponentFixture<ObserveValueFnTestComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ObserveFnTestComponent],
+      declarations: [ObserveValueFnTestComponent],
     }).compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ObserveFnTestComponent);
+    fixture = TestBed.createComponent(ObserveValueFnTestComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -80,14 +78,14 @@ describe('Observe', () => {
   providers: [OBSERVE_PROVIDER],
 })
 export class ObserveMapFnTestComponent {
-  observe: ObserveMapFn;
+  observe: ObserveFn;
   state: {
     text: string;
   };
   text$ = new BehaviorSubject('Foo');
 
   constructor(public readonly injector: Injector) {
-    this.observe = injector.get(OBSERVE_MAP);
+    this.observe = injector.get(OBSERVE);
     this.state = this.observe({
       text: this.text$,
     });
