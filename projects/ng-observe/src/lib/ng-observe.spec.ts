@@ -14,7 +14,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [OBSERVE_PROVIDER],
 })
-export class ObserveValueFnTestComponent {
+export class ValueTestComponent {
   observe: ObserveFn;
   text: Observed<string>;
   text$ = new BehaviorSubject('Foo');
@@ -29,18 +29,18 @@ export class ObserveValueFnTestComponent {
   }
 }
 
-describe('Observe', () => {
-  let component: ObserveValueFnTestComponent;
-  let fixture: ComponentFixture<ObserveValueFnTestComponent>;
+describe('Observe Value', () => {
+  let component: ValueTestComponent;
+  let fixture: ComponentFixture<ValueTestComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ObserveValueFnTestComponent],
+      declarations: [ValueTestComponent],
     }).compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ObserveValueFnTestComponent);
+    fixture = TestBed.createComponent(ValueTestComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -77,7 +77,7 @@ describe('Observe', () => {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [OBSERVE_PROVIDER],
 })
-export class ObserveMapFnTestComponent {
+export class CollectionTestComponent {
   observe: ObserveFn;
   state: {
     text: string;
@@ -98,18 +98,18 @@ export class ObserveMapFnTestComponent {
   }
 }
 
-describe('ObserveMap', () => {
-  let component: ObserveMapFnTestComponent;
-  let fixture: ComponentFixture<ObserveMapFnTestComponent>;
+describe('Observe Collection', () => {
+  let component: CollectionTestComponent;
+  let fixture: ComponentFixture<CollectionTestComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ObserveMapFnTestComponent],
+      declarations: [CollectionTestComponent],
     }).compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ObserveMapFnTestComponent);
+    fixture = TestBed.createComponent(CollectionTestComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

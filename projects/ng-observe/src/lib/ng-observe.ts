@@ -18,7 +18,7 @@ export class ObserveService implements OnDestroy {
   private hooks = new Map<number, () => void>();
   private noop = () => {};
 
-  map: ObserveMapFn = (sources, options = {} as any) => {
+  collection: ObserveCollectionFn = (sources, options = {} as any) => {
     type Key = keyof typeof sources;
 
     const sink: any = Array.isArray(sources) ? [] : {};
@@ -101,12 +101,12 @@ export const OBSERVE_PROVIDER = [
 
 export function observeFactory(service: ObserveService): ObserveFn {
   return (source: Observable<any> | Observables<any>) =>
-    isObservable(source) ? service.value(source) : service.map(source);
+    isObservable(source) ? service.value(source) : service.collection(source);
 }
 
-type ObserveMapFn = <T>(
+type ObserveCollectionFn = <T>(
   source: Observables<T>,
-  options?: ObserveMapOptions<T>
+  options?: ObserveCollectionOptions<T>
 ) => T;
 
 type ObserveValueFn = <T>(
@@ -116,14 +116,16 @@ type ObserveValueFn = <T>(
 
 export type ObserveFn = <T, S extends Observable<T> | Observables<T>>(
   source: S,
-  options?: S extends Observable<T> ? ObserveValueOptions : ObserveMapOptions<T>
+  options?: S extends Observable<T>
+    ? ObserveValueOptions
+    : ObserveCollectionOptions<T>
 ) => S extends Observable<T> ? Observed<T> : T;
 
 export type Observables<T> = {
   [K in keyof T]: Observable<T[K]>;
 };
 
-export type ObserveMapOptions<T> = {
+export type ObserveCollectionOptions<T> = {
   [K in keyof T]: ObserveValueOptions;
 };
 
