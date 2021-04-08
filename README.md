@@ -42,7 +42,7 @@ class DemoComponent {
 With ng-observe, we don't need to pipe the stream.
 
 ```typescript
-import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe';
+import { OBSERVE, OBSERVE_PROVIDER, ObserveFn } from 'ng-observe';
 
 @Component({
   template: '{{ fooBar }}',
@@ -73,10 +73,10 @@ To use ng-observe in your components and directives, add `OBSERVE_PROVIDER` to p
 
 #### ObserveFn
 
-This function is used to extract a single stream's value.You can inject it `OBSERVE` injection token.
+This function is used to extract a single stream's value. You can inject it via the `OBSERVE` injection token.
 
 ```typescript
-import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe';
+import { OBSERVE, OBSERVE_PROVIDER, ObserveFn } from 'ng-observe';
 
 @Component({
   template: '{{ foo.value }}',
@@ -89,55 +89,53 @@ class Component {
 }
 ```
 
-#### ObserveMapFn
-
-This function is used to extract multiple streams' value.You can inject it `OBSERVE_MAP` injection token.
+You can extract multiple streams' value too.
 
 ```typescript
-import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe';
+import { OBSERVE, OBSERVE_PROVIDER, ObserveFn } from 'ng-observe';
 
 @Component({
   template: '{{ state.foo }} {{ state.bar }}',
   providers: [OBSERVE_PROVIDER],
 })
 class Component {
-  state = this.observeMap({ foo: of('foo'), bar: of('bar') });
+  state = this.observe({ foo: of('foo'), bar: of('bar') });
 
-  constuctor(@Inject(OBSERVE_MAP) private observeMap: ObserveMapFn) {}
+  constuctor(@Inject(OBSERVE) private observe: ObserveFn) {}
 }
 ```
 
-Works with arrays too
+It works with arrays as well.
 
 ```typescript
-import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe';
+import { OBSERVE, OBSERVE_PROVIDER, ObserveFn } from 'ng-observe';
 
 @Component({
   template: '{{ state[0] }} {{ state[1] }}',
   providers: [OBSERVE_PROVIDER],
 })
 class Component {
-  state = this.observeMap([of('foo'), of('bar')]);
+  state = this.observe([of('foo'), of('bar')]);
 
-  constuctor(@Inject(OBSERVE_MAP) private observeMap: ObserveMapFn) {}
+  constuctor(@Inject(OBSERVE) private observe: ObserveFn) {}
 }
 ```
 
 #### ObserveService
 
-You can use `ObserveService`'s `value` and `map` methods instead of `ObserveFn` and `ObserveMapFn`.
+You can call `ObserveService`'s `value` and `collection` methods explicitly instead of `ObserveFn`. This offers a very slight (ignorable in most cases) performance improvement.
 
 ```typescript
 import { ObserveService } from 'ng-observe';
 
 @Component({
   template: '{{ foo.value }} {{ state[0] }} {{ state[1] }}',
-  providers: [OBSERVE_PROVIDER],
+  providers: [ObserveService],
 })
 class Component {
   foo = this.observe.value(of('foo'));
 
-  state = this.observe.map([of('foo'), of('bar')]);
+  state = this.observe.collection([of('foo'), of('bar')]);
 
   constuctor(private observe: ObserveService) {}
 }
@@ -145,7 +143,7 @@ class Component {
 
 #### Observed
 
-`ObserveFn` infers types for you, but if you want to assign observed value later, you can use `Observed` class for type annotation.
+`ObserveFn` infers types for you, but if you want to assign an observed value later, you can use `Observed` class for type annotation.
 
 ```typescript
 import { OBSERVE, OBSERVE_PROVIDER, Observed } from 'ng-observe';

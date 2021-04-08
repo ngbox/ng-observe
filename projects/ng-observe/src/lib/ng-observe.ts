@@ -5,7 +5,7 @@ import {
   Injectable,
   InjectionToken,
 } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { isObservable, Observable, Subscription } from 'rxjs';
 
 export const HASH_FN = new InjectionToken<HashFn>('HASH_FN', {
   providedIn: 'root',
@@ -18,7 +18,7 @@ export class ObserveService implements OnDestroy {
   private hooks = new Map<number, () => void>();
   private noop = () => {};
 
-  map: ObserveMapFn = (sources, options = {} as any) => {
+  collection: ObserveCollectionFn = (sources, options = {} as any) => {
     type Key = keyof typeof sources;
 
     const sink: any = Array.isArray(sources) ? [] : {};
@@ -31,9 +31,9 @@ export class ObserveService implements OnDestroy {
     return sink;
   };
 
-  value: ObserveFn = <T>(
+  value: ObserveValueFn = <T>(
     source: Observable<T>,
-    options?: ObserveOptions
+    options?: ObserveValueOptions
   ): Observed<T> => {
     const observed = new Observed<T>();
 
@@ -52,7 +52,7 @@ export class ObserveService implements OnDestroy {
     const fn = <T>(
       key: string | number | symbol,
       source: Observable<T>,
-      { uniqueId }: ObserveOptions = {}
+      { uniqueId }: ObserveValueOptions = {}
     ) => {
       let subscription = new Subscription();
       const unsubscribe = () => subscription.unsubscribe();
@@ -90,8 +90,6 @@ export class ObserveService implements OnDestroy {
 
 export const OBSERVE = new InjectionToken<ObserveFn>('OBSERVE');
 
-export const OBSERVE_MAP = new InjectionToken<ObserveMapFn>('OBSERVE_MAP');
-
 export const OBSERVE_PROVIDER = [
   ObserveService,
   {
@@ -99,42 +97,39 @@ export const OBSERVE_PROVIDER = [
     useFactory: observeFactory,
     deps: [ObserveService],
   },
-  {
-    provide: OBSERVE_MAP,
-    useFactory: observeMapFactory,
-    deps: [ObserveService],
-  },
 ];
 
 export function observeFactory(service: ObserveService): ObserveFn {
-  const fn = service.value;
-  return fn;
+  return (source: Observable<any> | Observables<any>) =>
+    isObservable(source) ? service.value(source) : service.collection(source);
 }
 
-export function observeMapFactory(service: ObserveService): ObserveMapFn {
-  const fn = service.map;
-  return fn;
-}
-
-export type ObserveMapFn = <T>(
+type ObserveCollectionFn = <T>(
   source: Observables<T>,
-  options?: ObserveMapOptions<T>
+  options?: ObserveCollectionOptions<T>
 ) => T;
 
-export type ObserveFn = <T>(
+type ObserveValueFn = <T>(
   source: Observable<T>,
-  options?: ObserveOptions
+  options?: ObserveValueOptions
 ) => Observed<T>;
+
+export type ObserveFn = <T, S extends Observable<T> | Observables<T>>(
+  source: S,
+  options?: S extends Observable<T>
+    ? ObserveValueOptions
+    : ObserveCollectionOptions<T>
+) => S extends Observable<T> ? Observed<T> : T;
 
 export type Observables<T> = {
   [K in keyof T]: Observable<T[K]>;
 };
 
-export type ObserveMapOptions<T> = {
-  [K in keyof T]: ObserveOptions;
+export type ObserveCollectionOptions<T> = {
+  [K in keyof T]: ObserveValueOptions;
 };
 
-export interface ObserveOptions {
+export interface ObserveValueOptions {
   uniqueId?: string;
 }
 
