@@ -1,10 +1,5 @@
 import type { OnDestroy } from '@angular/core';
-import {
-  ChangeDetectorRef,
-  Inject,
-  Injectable,
-  InjectionToken,
-} from '@angular/core';
+import { ChangeDetectorRef, Inject, Injectable, InjectionToken } from '@angular/core';
 import { isObservable, Observable, Subscription } from 'rxjs';
 
 export const HASH_FN = new InjectionToken<HashFn>('HASH_FN', {
@@ -15,67 +10,67 @@ export const HASH_FN = new InjectionToken<HashFn>('HASH_FN', {
 // @dynamic
 @Injectable()
 export class ObserveService implements OnDestroy {
-  private hooks = new Map<number, () => void>();
+  private hooks = new Map<string | number, () => void>();
   private noop = () => {};
 
   collection: ObserveCollectionFn = (sources, options = {} as any) => {
-    type Key = keyof typeof sources;
-
     const sink: any = Array.isArray(sources) ? [] : {};
     const observe = this.observe(sink);
 
-    (Object.keys(sources) as Key[]).forEach(key => {
-      observe(key, sources[key], options[key]);
-    }, {} as any);
+    Object.keys(sources).forEach(key => {
+      const source: any = sources[key as keyof typeof sources];
+      const option: any = options[key as keyof typeof options];
+      observe(key, source, option);
+    });
 
     return sink;
   };
 
-  value: ObserveValueFn = <T>(
-    source: Observable<T>,
+  value: ObserveValueFn = <Value>(
+    source: Observable<Value>,
     options?: ObserveValueOptions
-  ): Observed<T> => {
-    const observed = new Observed<T>();
+  ): Observed<Value> => {
+    const value = (null as any) as Value;
+    const observed = new Observed<Value>({ value }, 'value');
 
     this.observe(observed)('value', source, options);
 
     return observed;
   };
 
-  constructor(
-    private cdRef: ChangeDetectorRef,
-    @Inject(HASH_FN) private hash: HashFn
-  ) {}
+  constructor(private cdRef: ChangeDetectorRef, @Inject(HASH_FN) private hash: HashFn) {}
 
-  // tslint:disable-next-line: typedef
-  private observe(sink: any) {
-    const fn = <T>(
+  private createUniqueId(): string {
+    try {
+      throw new Error();
+    } catch (e) {
+      return String(this.hash(e.stack));
+    }
+  }
+
+  private observe(sink: any): Observe {
+    const fn = <Value>(
       key: string | number | symbol,
-      source: Observable<T>,
-      { uniqueId }: ObserveValueOptions = {}
+      source: Observable<Value>,
+      { uniqueId = this.createUniqueId(), errorHandler = () => {} }: ObserveValueOptions = {}
     ) => {
       let subscription = new Subscription();
       const unsubscribe = () => subscription.unsubscribe();
       const complete = () => {
-        (this.hooks.get(id) || this.noop)();
-        this.hooks.delete(id);
+        (this.hooks.get(uniqueId) || this.noop)();
+        this.hooks.delete(uniqueId);
       };
 
-      let id: number;
-      try {
-        throw new Error();
-      } catch (e) {
-        id = this.hash(uniqueId || e.stack);
-      }
-
       complete();
-      this.hooks.set(id, unsubscribe);
+      this.hooks.set(uniqueId, unsubscribe);
 
+      // tslint:disable-next-line: deprecation
       subscription = source.subscribe({
         next: x => {
           sink[key] = x;
           this.cdRef.markForCheck();
         },
+        error: errorHandler,
         complete,
       });
     };
@@ -100,50 +95,92 @@ export const OBSERVE_PROVIDER = [
 ];
 
 export function observeFactory(service: ObserveService): ObserveFn {
-  return (source: Observable<any> | Observables<any>) =>
-    isObservable(source) ? service.value(source) : service.collection(source);
+  return <ValueOrCollection extends any>(
+    source: Observable<ValueOrCollection> | ObservableCollection<ValueOrCollection>
+  ) => (isObservable(source) ? service.value(source) : service.collection(source));
 }
 
-type ObserveCollectionFn = <T>(
-  source: Observables<T>,
-  options?: ObserveCollectionOptions<T>
-) => T;
+type ObserveCollectionFn = <Collection>(
+  source: ObservableCollection<Collection>,
+  options?: ObserveCollectionOptions<Collection>
+) => Collection;
 
-type ObserveValueFn = <T>(
-  source: Observable<T>,
+type ObserveValueFn = <Value>(
+  source: Observable<Value>,
   options?: ObserveValueOptions
-) => Observed<T>;
+) => Observed<Value>;
 
-export type ObserveFn = <T, S extends Observable<T> | Observables<T>>(
-  source: S,
-  options?: S extends Observable<T>
-    ? ObserveValueOptions
-    : ObserveCollectionOptions<T>
-) => S extends Observable<T> ? Observed<T> : T;
+export type ObserveFn = <Source extends Observable<any> | ObservableCollection<any>>(
+  source: Source,
+  options?: ObserveFnOptions<Source>
+) => ObserveFnReturnValue<Source>;
 
-export type Observables<T> = {
-  [K in keyof T]: Observable<T[K]>;
-};
+type Observe = <Value>(
+  key: string | number | symbol,
+  source: Observable<Value>,
+  options?: ObserveValueOptions
+) => void;
 
-export type ObserveCollectionOptions<T> = {
-  [K in keyof T]: ObserveValueOptions;
-};
+export type ObservableCollection<Collection> = Collection extends Array<infer Value>
+  ? Array<Observable<Value>>
+  : {
+      [Key in keyof Collection]: Observable<Collection[Key]>;
+    };
+
+export type ObserveCollectionOptions<Collection> = Collection extends Array<any>
+  ? Array<ObserveValueOptions>
+  : {
+      [Key in keyof Collection]: ObserveValueOptions;
+    };
+
+export type ObservedValues<Collection> = Collection extends Array<infer Value>
+  ? Array<Observed<Value>>
+  : {
+      [Key in keyof Collection]: Observed<Collection[Key]>;
+    };
 
 export interface ObserveValueOptions {
+  errorHandler?: (err: any) => void;
   uniqueId?: string;
 }
 
-export class Observed<T> {
-  constructor(public readonly value?: T) {}
+export type ObserveFnOptions<Source> = Source extends Observable<any>
+  ? ObserveValueOptions
+  : Source extends ObservableCollection<infer Collection>
+  ? ObserveCollectionOptions<Collection>
+  : never;
+
+export type ObserveFnReturnValue<Source> = Source extends Observable<infer Value>
+  ? Observed<Value>
+  : Source extends ObservableCollection<infer Collection>
+  ? Collection
+  : never;
+
+export class Observed<Value> {
+  private readonly collection: any;
+  private readonly key: number | string;
+
+  constructor(collection: Array<Value>, key: number);
+  constructor(collection: Record<string, Value>, key: string);
+  constructor(collection: Array<Value> | Record<string, Value>, key: number | string) {
+    this.collection = collection;
+    this.key = key;
+  }
+
+  get value(): Value {
+    return this.collection[this.key];
+  }
+
+  set value(nextValue: Value) {
+    this.collection[this.key] = nextValue;
+  }
 }
 
 export type HashFn = (input: string) => number;
 
 export function createHashFn(): HashFn {
   const k = 2654435761;
-  const shift = Math.imul
-    ? (n: number) => Math.imul(n, k)
-    : (n: number) => imul(n, k);
+  const shift = Math.imul ? (n: number) => Math.imul(n, k) : (n: number) => imul(n, k);
 
   const hashFn = (input: string) => {
     let index = input.length;
