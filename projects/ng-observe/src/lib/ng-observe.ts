@@ -207,3 +207,36 @@ export function imul(a: number, b: number): number {
 
   return result | 0;
 }
+
+export function toValue<Value>(collection: Array<Value>, key: number): Observed<Value>;
+export function toValue<Value>(collection: Record<string, Value>, key: string): Observed<Value>;
+export function toValue<Value>(
+  collection: Array<Value> | Record<string, Value>,
+  key: number | string
+): Observed<Value> {
+  return new Observed<Value>(collection as any, key as any);
+}
+
+export function toValues<Collection extends any[]>(
+  collection: Collection
+): ObservedValues<Collection>;
+export function toValues<Collection extends Record<string, any>>(
+  collection: Collection
+): ObservedValues<Collection>;
+export function toValues<Value>(
+  collection: Value[] | Record<string, Value>
+): ObservedValues<Value[] | Record<string, Value>> {
+  if (Array.isArray(collection)) {
+    return collection.map((_, index) => new Observed(collection, index));
+  }
+
+  const values: Record<string, Observed<Value>> = {};
+
+  for (const key in collection) {
+    if (collection.hasOwnProperty(key)) {
+      values[key] = new Observed(collection, key);
+    }
+  }
+
+  return values;
+}

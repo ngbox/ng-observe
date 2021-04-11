@@ -7,6 +7,8 @@ import {
   ObserveFn,
   ObserveService,
   OBSERVE_PROVIDER,
+  toValue,
+  toValues,
 } from './ng-observe';
 
 @Component({
@@ -79,22 +81,27 @@ describe('Observe Value', () => {
 })
 export class CollectionTestComponent {
   observe: ObserveFn;
-  state: {
-    text: string;
-  };
+  state: { text: string };
+  text!: Observed<string>;
   text$ = new BehaviorSubject('Foo');
+  values!: { text: Observed<string> };
 
   constructor(public readonly injector: Injector) {
     this.observe = injector.get(OBSERVE);
     this.state = this.observe({
       text: this.text$,
     });
+    this.setTextAndValues();
   }
 
-  setText(source?: Observable<any>): void {
-    this.state = this.observe({
-      text: source || this.text$,
-    });
+  setState(nextState: { text: Observable<string> }): void {
+    this.state = this.observe(nextState);
+    this.setTextAndValues();
+  }
+
+  private setTextAndValues(): void {
+    this.values = toValues(this.state);
+    this.text = toValue(this.state, 'text');
   }
 }
 
@@ -116,6 +123,8 @@ describe('Observe Collection', () => {
 
   it('should unwrap observed value', () => {
     expect(component.state.text).toBe('Foo');
+    expect(component.text.value).toBe('Foo');
+    expect(component.values.text.value).toBe('Foo');
     expect(fixture.nativeElement.textContent).toBe('Foo');
   });
 
@@ -123,6 +132,8 @@ describe('Observe Collection', () => {
     component.text$.next('Qux');
     fixture.detectChanges();
     expect(component.state.text).toBe('Qux');
+    expect(component.text.value).toBe('Qux');
+    expect(component.values.text.value).toBe('Qux');
     expect(fixture.nativeElement.textContent).toBe('Qux');
   });
 
@@ -131,9 +142,11 @@ describe('Observe Collection', () => {
     expect(service['hooks'].size).toBe(1);
 
     ['0', '1', '2', '3', '4'].forEach(value => {
-      component.setText(of(value));
+      component.setState({ text: of(value) });
       fixture.detectChanges();
       expect(component.state.text).toBe(value);
+      expect(component.text.value).toBe(value);
+      expect(component.values.text.value).toBe(value);
       expect(fixture.nativeElement.textContent).toBe(value);
     });
 
