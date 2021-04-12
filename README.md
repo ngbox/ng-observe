@@ -55,7 +55,7 @@ class DemoComponent {
     return this.foo.value + 'bar';
   }
 
-  constuctor(@Inject(OBSERVE) private observe: ObserveFn) {}
+  constructor(@Inject(OBSERVE) private observe: ObserveFn) {}
 }
 ```
 
@@ -64,6 +64,8 @@ You can see other examples at links below:
 - [Basic HTTP example](https://stackblitz.com/edit/ng-observe?file=src%2Fapp%2Fapp.ts)
 - [Using with Angular router](https://stackblitz.com/edit/ng-observe-router?file=src%2Fapp%2Fapp.ts)
 - [Using with NgRx](https://stackblitz.com/edit/ng-observe-ngrx?file=src%2Fapp%2Fapp.ts)
+
+> **Important Note:** Do not destructure a collection created by the `ObserveFn`. Otherwise, the reactivity will be lost. Use `toValue` or `toValues` to convert elements of the collection to instances of `Observed` instead.
 
 ### API
 
@@ -85,7 +87,7 @@ import { OBSERVE, OBSERVE_PROVIDER, ObserveFn } from 'ng-observe';
 class Component {
   foo = this.observe(of('foo'));
 
-  constuctor(@Inject(OBSERVE) private observe: ObserveFn) {}
+  constructor(@Inject(OBSERVE) private observe: ObserveFn) {}
 }
 ```
 
@@ -101,7 +103,7 @@ import { OBSERVE, OBSERVE_PROVIDER, ObserveFn } from 'ng-observe';
 class Component {
   state = this.observe({ foo: of('foo'), bar: of('bar') });
 
-  constuctor(@Inject(OBSERVE) private observe: ObserveFn) {}
+  constructor(@Inject(OBSERVE) private observe: ObserveFn) {}
 }
 ```
 
@@ -117,7 +119,7 @@ import { OBSERVE, OBSERVE_PROVIDER, ObserveFn } from 'ng-observe';
 class Component {
   state = this.observe([of('foo'), of('bar')]);
 
-  constuctor(@Inject(OBSERVE) private observe: ObserveFn) {}
+  constructor(@Inject(OBSERVE) private observe: ObserveFn) {}
 }
 ```
 
@@ -137,7 +139,7 @@ class Component {
 
   state = this.observe.collection([of('foo'), of('bar')]);
 
-  constuctor(private observe: ObserveService) {}
+  constructor(private observe: ObserveService) {}
 }
 ```
 
@@ -155,8 +157,57 @@ import { OBSERVE, OBSERVE_PROVIDER, Observed } from 'ng-observe';
 class Component {
   foo: Observed<string>;
 
-  constuctor(@Inject(OBSERVE) private observe: ObserveFn) {
+  constructor(@Inject(OBSERVE) private observe: ObserveFn) {
     this.foo = this.observe(of('foo'));
+  }
+}
+```
+
+#### toValue
+
+`toValue` converts an element in the collection to an observed value, i.e. an instance of the `Observed` class.
+
+```typescript
+import { OBSERVE, OBSERVE_PROVIDER, Observed, ObserveFn, toValue } from 'ng-observe';
+
+@Component({
+  template: '{{ foo.value }} {{ bar.value }}',
+  providers: [OBSERVE_PROVIDER],
+})
+class Component {
+  foo: Observed<string>;
+
+  bar: Observed<string>;
+
+  constructor(@Inject(OBSERVE) private observe: ObserveFn) {
+    const state = this.observe({ foo: of('foo'), bar: of('bar') });
+    this.foo = toValue(state, 'foo');
+    this.bar = toValue(state, 'bar');
+  }
+}
+```
+
+#### toValues
+
+`toValues` converts all elements in collection to observed values, i.e. instances of the `Observed` class.
+
+```typescript
+import { OBSERVE, OBSERVE_PROVIDER, Observed, ObserveFn, toValues } from 'ng-observe';
+
+@Component({
+  template: '{{ foo.value }} {{ bar.value }}',
+  providers: [OBSERVE_PROVIDER],
+})
+class Component {
+  foo: Observed<string>;
+
+  bar: Observed<string>;
+
+  constructor(@Inject(OBSERVE) private observe: ObserveFn) {
+    const state = this.observe({ foo: of('foo'), bar: of('bar') });
+    const { foo, bar } = toValues(state);
+    this.foo = foo;
+    this.bar = bar;
   }
 }
 ```
