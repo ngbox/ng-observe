@@ -1,11 +1,34 @@
 {
   "name": "ng-observe",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.0",
+  "description": "Angular reactivity streamlined...",
+    "keywords": [
+    "angular",
+    "angular2",
+    "reactivity",
+    "reactive-programming",
+    "streams",
+    "rxjs",
+    "subscription",
+    "observer",
+    "observable",
+    "utility",
+    "typescript",
+    "javascript"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ngbox/ng-observe"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=8.5",
+    "npm": ">=6.0",
+    "yarn": "^1.0"
+  },
   "peerDependencies": {
     "@angular/core": ">=6.0.0",
     "rxjs": ">=6.0.0 || ^5.6.0-forward-compat.4"
-  },
-  "dependencies": {
-    "tslib": "^2.0.0"
   }
 }
