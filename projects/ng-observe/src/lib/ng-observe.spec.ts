@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Injector } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import {
+  isCollection,
   OBSERVE,
   Observed,
   ObserveFn,
@@ -45,6 +46,11 @@ describe('Observe Value', () => {
     fixture = TestBed.createComponent(ValueTestComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('should create an observed value', () => {
+    expect(isCollection(component.text)).toBeFalse();
+    expect(component.text instanceof Observed).toBeTrue();
   });
 
   it('should unwrap observed value', () => {
@@ -119,6 +125,14 @@ describe('Observe Collection', () => {
     fixture = TestBed.createComponent(CollectionTestComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('should create an observed collection', () => {
+    expect(isCollection({})).toBeFalse();
+    expect(isCollection([])).toBeFalse();
+    expect(isCollection(component.state)).toBeTrue();
+    expect(component.text instanceof Observed).toBeTrue();
+    expect(component.values.text instanceof Observed).toBeTrue();
   });
 
   it('should unwrap observed value', () => {

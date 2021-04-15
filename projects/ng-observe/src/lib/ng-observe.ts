@@ -7,6 +7,8 @@ export const HASH_FN = new InjectionToken<HashFn>('HASH_FN', {
   factory: createHashFn,
 });
 
+const BRAND = '__ngObserve__';
+
 // @dynamic
 @Injectable()
 export class ObserveService implements OnDestroy {
@@ -15,6 +17,11 @@ export class ObserveService implements OnDestroy {
 
   collection: ObserveCollectionFn = (sources, options = {} as any) => {
     const sink: any = Array.isArray(sources) ? [] : {};
+    Object.defineProperty(sink, BRAND, {
+      value: true,
+      enumerable: false,
+      writable: false,
+    });
     const observe = this.observe(sink);
 
     Object.keys(sources).forEach(key => {
@@ -206,6 +213,10 @@ export function imul(a: number, b: number): number {
   }
 
   return result | 0;
+}
+
+export function isCollection(source: any): boolean {
+  return Boolean(source && source[BRAND]);
 }
 
 export function toValue<Value>(collection: Array<Value>, key: number): Observed<Value>;
