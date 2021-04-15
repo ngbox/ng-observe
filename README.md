@@ -18,7 +18,7 @@ Angular reactivity streamlined...
 ### How it works
 
 - Extracts emitted value from observables.
-- Triggers change detection.
+- Marks the component for change detection.
 - Leaves no subscription behind.
 - Clears old subscriptions and creates new ones at each execution if used in getters, setters or methods.
 
