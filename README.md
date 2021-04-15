@@ -211,3 +211,22 @@ class Component {
   }
 }
 ```
+
+#### isCollection
+
+Collections observed by ng-observe are plain arrays or objects, but you can detect them with `isCollection` function. It returns `true` when input is an observed collection, and `false` when not.
+
+```typescript
+import { isCollection, OBSERVE, OBSERVE_PROVIDER, ObserveFn } from 'ng-observe';
+
+@Component({
+  template: '<!-- not important for this example -->',
+  providers: [OBSERVE_PROVIDER],
+})
+class Component {
+  constructor(@Inject(OBSERVE) private observe: ObserveFn) {
+    const state = this.observe({ foo: of('foo'), bar: of('bar') });
+    console.log(isCollection(state)); // true
+  }
+}
+```
