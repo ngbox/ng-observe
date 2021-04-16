@@ -110,7 +110,7 @@ export class CollectionTestComponent {
   private setTextAndValues(): void {
     this.values = toValues(this.state);
     this.text = toValue(this.state, 'text');
-    this.firstCharCode = toMappedValue(this.state, state => state.text.charCodeAt(0));
+    this.firstCharCode = toMappedValue(this.state, ({ text }) => text.charCodeAt(0));
   }
 }
 
