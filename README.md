@@ -165,7 +165,7 @@ class Component {
 
 #### toValue
 
-`toValue` converts an element in the collection to an observed value, i.e. an instance of the `Observed` class.
+`toValue` converts an element in the collection to a reactive observed value. Returns an instance of the `Observed` class.
 
 ```typescript
 import { OBSERVE, OBSERVE_PROVIDER, Observed, ObserveFn, toValue } from 'ng-observe';
@@ -187,9 +187,30 @@ class Component {
 }
 ```
 
+#### toMappedValue
+
+You can use `toMappedValue` to get a reactive observed value mapped from the collection. Returns an instance of the `Observed` class.
+
+```typescript
+import { OBSERVE, OBSERVE_PROVIDER, Observed, ObserveFn, toMappedValue } from 'ng-observe';
+
+@Component({
+  template: '{{ fooBar.value }}',
+  providers: [OBSERVE_PROVIDER],
+})
+class Component {
+  fooBar: Observed<string>;
+
+  constructor(@Inject(OBSERVE) private observe: ObserveFn) {
+    const state = this.observe({ foo: of('foo'), bar: of('bar') });
+    this.fooBar = toMappedValue(state, ({ foo, bar }) => `${foo} ${bar}`);
+  }
+}
+```
+
 #### toValues
 
-`toValues` converts all elements in collection to observed values, i.e. instances of the `Observed` class.
+`toValues` converts all elements in collection to reactive observed values. Returns an array/object the indices/keys of which will be the same with the input collection. Each element will be an instance of the `Observed` class.
 
 ```typescript
 import { OBSERVE, OBSERVE_PROVIDER, Observed, ObserveFn, toValues } from 'ng-observe';
