@@ -22,8 +22,8 @@ export class ObserveService implements OnDestroy {
       enumerable: false,
       writable: false,
     });
-    const observe = this.observe(sink);
 
+    const observe = this.observe(sink);
     Object.keys(sources).forEach(key => {
       const source: any = sources[key as keyof typeof sources];
       const option: any = options[key as keyof typeof options];
@@ -37,12 +37,11 @@ export class ObserveService implements OnDestroy {
     source: Observable<Value>,
     options?: ObserveValueOptions
   ): Observed<Value> => {
-    const value = (null as any) as Value;
-    const observed = new Observed<Value>({ value }, 'value');
+    const sink = {};
 
-    this.observe(observed)('value', source, options);
+    this.observe(sink)('value', source, options);
 
-    return observed;
+    return toValue(sink, 'value');
   };
 
   constructor(private cdRef: ChangeDetectorRef, @Inject(HASH_FN) private hash: HashFn) {}
@@ -163,23 +162,15 @@ export type ObserveFnReturnValue<Source> = Source extends Observable<infer Value
   ? Collection
   : never;
 
-export class Observed<Value> {
-  private readonly collection: any;
-  private readonly key: number | string;
+export class Observed<Value, Seed = unknown> {
+  private readonly getter: () => Value;
 
-  constructor(collection: Array<Value>, key: number);
-  constructor(collection: Record<string, Value>, key: string);
-  constructor(collection: Array<Value> | Record<string, Value>, key: number | string) {
-    this.collection = collection;
-    this.key = key;
+  constructor(private readonly seed: Seed, mapFn: (source: typeof seed) => Value) {
+    this.getter = () => mapFn(this.seed);
   }
 
   get value(): Value {
-    return this.collection[this.key];
-  }
-
-  set value(nextValue: Value) {
-    this.collection[this.key] = nextValue;
+    return this.getter();
   }
 }
 
@@ -225,7 +216,7 @@ export function toValue<Value>(
   collection: Array<Value> | Record<string, Value>,
   key: number | string
 ): Observed<Value> {
-  return new Observed<Value>(collection as any, key as any);
+  return new Observed(collection as any, source => source[key]);
 }
 
 export function toValues<Collection extends any[]>(
@@ -238,14 +229,14 @@ export function toValues<Value>(
   collection: Value[] | Record<string, Value>
 ): ObservedValues<Value[] | Record<string, Value>> {
   if (Array.isArray(collection)) {
-    return collection.map((_, index) => new Observed(collection, index));
+    return collection.map((_, index) => new Observed(collection, source => source[index]));
   }
 
   const values: Record<string, Observed<Value>> = {};
 
   for (const key in collection) {
     if (collection.hasOwnProperty(key)) {
-      values[key] = new Observed(collection, key);
+      values[key] = new Observed(collection, source => source[key]);
     }
   }
 
