@@ -210,6 +210,13 @@ export function isCollection(source: any): boolean {
   return Boolean(source && source[BRAND]);
 }
 
+export function toMappedValue<Value, Seed extends Array<any> | Record<string, any>>(
+  collection: Seed,
+  mapFn: (source: typeof collection) => Value
+): Observed<Value> {
+  return new Observed(collection as any, mapFn);
+}
+
 export function toValue<Value>(collection: Array<Value>, key: number): Observed<Value>;
 export function toValue<Value>(collection: Record<string, Value>, key: string): Observed<Value>;
 export function toValue<Value>(
