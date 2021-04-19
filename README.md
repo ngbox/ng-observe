@@ -1,6 +1,6 @@
 <p align="center">
   <br />&nbsp;<br />
-  <img alt="ng-observe logo" src="https://user-images.githubusercontent.com/15855540/110312130-c1431680-8015-11eb-82eb-29f792beb6bc.png" width="192" align="middle" />
+  <img alt="ng-observe logo" src="https://user-images.githubusercontent.com/34455572/115234990-54499300-a122-11eb-84ae-30640268fded.png" width="192" align="middle" />
 </p>
 <h1 align="center">
   ng-observe
@@ -251,3 +251,17 @@ class Component {
   }
 }
 ```
+
+### Sponsors
+
+![volosoft](https://user-images.githubusercontent.com/34455572/115241777-dc7f6680-a129-11eb-8318-4f3c811547e8.png)
+
+
+---
+
+<p align="center">
+<picture>
+  <source srcset="https://user-images.githubusercontent.com/34455572/115241284-4cd9b800-a129-11eb-8131-ff4ecd8c58de.png" media="(prefers-color-scheme: dark)">
+  <img src="https://user-images.githubusercontent.com/34455572/115241227-3df30580-a129-11eb-90e4-e8d0e5a93af8.png" alt="Developed by NG Box" />
+</picture>
+</p>
