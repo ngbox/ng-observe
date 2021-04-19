@@ -257,11 +257,11 @@ class Component {
 ![volosoft](https://user-images.githubusercontent.com/34455572/115241777-dc7f6680-a129-11eb-8318-4f3c811547e8.png)
 
 
----
+<hr />
 
 <p align="center">
 <picture>
   <source srcset="https://user-images.githubusercontent.com/34455572/115241284-4cd9b800-a129-11eb-8131-ff4ecd8c58de.png" media="(prefers-color-scheme: dark)">
-  <img src="https://user-images.githubusercontent.com/34455572/115241227-3df30580-a129-11eb-90e4-e8d0e5a93af8.png" alt="Developed by NG Box" />
+  <img width="340" src="https://user-images.githubusercontent.com/34455572/115241227-3df30580-a129-11eb-90e4-e8d0e5a93af8.png" alt="Developed by NG Box" />
 </picture>
 </p>
