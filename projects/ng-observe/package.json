@@ -1,8 +1,8 @@
 {
   "name": "ng-observe",
-  "version": "1.0.0-rc.0",
+  "version": "1.0.0",
   "description": "Angular reactivity streamlined...",
-    "keywords": [
+  "keywords": [
     "angular",
     "angular2",
     "reactivity",
