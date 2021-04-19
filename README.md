@@ -254,7 +254,7 @@ class Component {
 
 ### Sponsors
 
-![volosoft](https://user-images.githubusercontent.com/34455572/115241777-dc7f6680-a129-11eb-8318-4f3c811547e8.png)
+[![volosoft](https://user-images.githubusercontent.com/34455572/115241777-dc7f6680-a129-11eb-8318-4f3c811547e8.png)](https://volosoft.com/)
 
 
 <hr />
