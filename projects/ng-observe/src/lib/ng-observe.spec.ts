@@ -8,6 +8,7 @@ import {
   ObserveFn,
   ObserveService,
   OBSERVE_PROVIDER,
+  toMappedValue,
   toValue,
   toValues,
 } from './ng-observe';
@@ -89,6 +90,7 @@ export class CollectionTestComponent {
   observe: ObserveFn;
   state: { text: string };
   text!: Observed<string>;
+  firstCharCode!: Observed<number>;
   text$ = new BehaviorSubject('Foo');
   values!: { text: Observed<string> };
 
@@ -108,6 +110,7 @@ export class CollectionTestComponent {
   private setTextAndValues(): void {
     this.values = toValues(this.state);
     this.text = toValue(this.state, 'text');
+    this.firstCharCode = toMappedValue(this.state, ({ text }) => text.charCodeAt(0));
   }
 }
 
@@ -138,6 +141,7 @@ describe('Observe Collection', () => {
   it('should unwrap observed value', () => {
     expect(component.state.text).toBe('Foo');
     expect(component.text.value).toBe('Foo');
+    expect(component.firstCharCode.value).toBe(70);
     expect(component.values.text.value).toBe('Foo');
     expect(fixture.nativeElement.textContent).toBe('Foo');
   });
@@ -147,6 +151,7 @@ describe('Observe Collection', () => {
     fixture.detectChanges();
     expect(component.state.text).toBe('Qux');
     expect(component.text.value).toBe('Qux');
+    expect(component.firstCharCode.value).toBe(81);
     expect(component.values.text.value).toBe('Qux');
     expect(fixture.nativeElement.textContent).toBe('Qux');
   });
@@ -160,6 +165,7 @@ describe('Observe Collection', () => {
       fixture.detectChanges();
       expect(component.state.text).toBe(value);
       expect(component.text.value).toBe(value);
+      expect(component.firstCharCode.value).toBe(value.charCodeAt(0));
       expect(component.values.text.value).toBe(value);
       expect(fixture.nativeElement.textContent).toBe(value);
     });
