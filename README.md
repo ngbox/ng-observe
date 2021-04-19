@@ -260,8 +260,5 @@ class Component {
 <hr />
 
 <p align="center">
-<picture>
-  <source srcset="https://user-images.githubusercontent.com/34455572/115241284-4cd9b800-a129-11eb-8131-ff4ecd8c58de.png" media="(prefers-color-scheme: dark)">
-  <img width="340" src="https://user-images.githubusercontent.com/34455572/115241227-3df30580-a129-11eb-90e4-e8d0e5a93af8.png" alt="Developed by NG Box" />
-</picture>
+  <img width="340" src="https://user-images.githubusercontent.com/34455572/115242872-f8373c80-a12a-11eb-9b52-f3b75bd2f61e.png" alt="Developed by NG Box" />
 </p>
