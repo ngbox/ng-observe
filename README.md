@@ -67,7 +67,7 @@ You can see other examples at links below:
 
 > **Important Note:** Do not destructure a collection created by the `ObserveFn`. Otherwise, the reactivity will be lost. Use `toValue` or `toValues` to convert elements of the collection to instances of `Observed` instead.
 
-You can read this [medium](https://ozak.medium.com/angular-reactivity-streamlined-831754b60a11) article about what is the motivation behind ng-observe
+You can read [this Medium article](https://ozak.medium.com/angular-reactivity-streamlined-831754b60a11) to learn about what the motivation behind ng-observe is.
 
 ### API
 
