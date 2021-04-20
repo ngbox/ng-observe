@@ -61,11 +61,13 @@ class DemoComponent {
 
 You can see other examples at links below:
 
-- [Basic HTTP example](https://stackblitz.com/edit/ng-observe?file=src%2Fapp%2Fapp.ts)
+- [Basic example](https://stackblitz.com/edit/ng-observe?file=src%2Fapp%2Fapp.ts)
 - [Using with Angular router](https://stackblitz.com/edit/ng-observe-router?file=src%2Fapp%2Fapp.ts)
 - [Using with NgRx](https://stackblitz.com/edit/ng-observe-ngrx?file=src%2Fapp%2Fapp.ts)
 
 > **Important Note:** Do not destructure a collection created by the `ObserveFn`. Otherwise, the reactivity will be lost. Use `toValue` or `toValues` to convert elements of the collection to instances of `Observed` instead.
+
+You can read this [medium](https://ozak.medium.com/angular-reactivity-streamlined-831754b60a11) article about what is the motivation behind ng-observe
 
 ### API
 
