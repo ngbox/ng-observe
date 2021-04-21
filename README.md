@@ -22,6 +22,20 @@ Angular reactivity streamlined...
 - Leaves no subscription behind.
 - Clears old subscriptions and creates new ones at each execution if used in getters, setters or methods.
 
+### How to use
+
+Install the package, and you are good to go. No module import is necessary.
+
+```
+npm install ng-observe
+```
+
+...or...
+
+```
+yarn add ng-observe
+```
+
 ### Example
 
 We can subscribe to a stream with the `AsyncPipe` in component templates, but we can't use it in component or directive classes.
