@@ -46,11 +46,11 @@ export class ObserveService implements OnDestroy {
 
   constructor(private cdRef: ChangeDetectorRef, @Inject(HASH_FN) private hash: HashFn) {}
 
-  private createUniqueId(): string {
+  private createUniqueId(key: string | number | symbol): string {
     try {
       throw new Error();
     } catch (e) {
-      return String(this.hash(e.stack));
+      return String(this.hash(e.stack + String(key)));
     }
   }
 
@@ -58,7 +58,7 @@ export class ObserveService implements OnDestroy {
     const fn = <Value>(
       key: string | number | symbol,
       source: Observable<Value>,
-      { uniqueId = this.createUniqueId(), errorHandler = () => {} }: ObserveValueOptions = {}
+      { uniqueId = this.createUniqueId(key), errorHandler = () => {} }: ObserveValueOptions = {}
     ) => {
       let subscription = new Subscription();
       const unsubscribe = () => subscription.unsubscribe();
