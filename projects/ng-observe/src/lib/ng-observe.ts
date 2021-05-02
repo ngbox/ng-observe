@@ -140,7 +140,7 @@ export type ObservableCollection<Collection> = Collection extends Array<infer Va
 export type ObserveCollectionOptions<Collection> = Collection extends Array<any>
   ? Array<ObserveValueOptions>
   : {
-      [Key in keyof Collection]: ObserveValueOptions;
+      [Key in keyof Collection]?: ObserveValueOptions;
     };
 
 export type ObservedValues<Collection> = Collection extends Array<infer Value>
