@@ -102,8 +102,12 @@ export const OBSERVE_PROVIDER = [
 
 export function observeFactory(service: ObserveService): ObserveFn {
   return <ValueOrCollection extends any>(
-    source: Observable<ValueOrCollection> | ObservableCollection<ValueOrCollection>
-  ) => (isObservable(source) ? service.value(source) : service.collection(source));
+    source: Observable<ValueOrCollection> | ObservableCollection<ValueOrCollection>,
+    options?: ObserveValueOptions | ObserveCollectionOptions<ValueOrCollection>
+  ) =>
+    isObservable(source)
+      ? service.value(source, options as ObserveValueOptions)
+      : service.collection(source, options as ObserveCollectionOptions<ValueOrCollection>);
 }
 
 type ObserveCollectionFn = <Collection>(
@@ -136,7 +140,7 @@ export type ObservableCollection<Collection> = Collection extends Array<infer Va
 export type ObserveCollectionOptions<Collection> = Collection extends Array<any>
   ? Array<ObserveValueOptions>
   : {
-      [Key in keyof Collection]: ObserveValueOptions;
+      [Key in keyof Collection]?: ObserveValueOptions;
     };
 
 export type ObservedValues<Collection> = Collection extends Array<infer Value>
