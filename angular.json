@@ -26,11 +26,9 @@
           }
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular-builders/jest:run",
           "options": {
-            "main": "projects/ng-observe/src/test.ts",
-            "tsConfig": "projects/ng-observe/tsconfig.spec.json",
-            "karmaConfig": "projects/ng-observe/karma.conf.js"
+            "no-cache": true
           }
         },
         "lint": {
@@ -40,9 +38,7 @@
               "projects/ng-observe/tsconfig.lib.json",
               "projects/ng-observe/tsconfig.spec.json"
             ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "exclude": ["**/node_modules/**"]
           }
         }
       }
