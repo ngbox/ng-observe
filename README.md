@@ -14,6 +14,7 @@ Angular reactivity streamlined...
 - Unlike [AsyncPipe](https://angular.io/api/common/AsyncPipe), you can use it in component classes and even in directives.
 - Feels more reactive than unsubscribing on destroy (be it handled by a decorator, triggered by a subject, or done by a direct call in the lifecycle hook).
 - Reduces the complexity of working with streams.
+- Works in zoneless apps. (v1.1.0+)
 
 ### How it works
 
@@ -78,6 +79,7 @@ You can see other examples at links below:
 - [Basic example](https://stackblitz.com/edit/ng-observe?file=src%2Fapp%2Fapp.ts)
 - [Using with Angular router](https://stackblitz.com/edit/ng-observe-router?file=src%2Fapp%2Fapp.ts)
 - [Using with NgRx](https://stackblitz.com/edit/ng-observe-ngrx?file=src%2Fapp%2Fapp.ts)
+- [Zoneless](https://stackblitz.com/edit/ng-observe-zoneless?file=src%2Fapp%2Fapp.ts)
 
 > **Important Note:** Do not destructure a collection created by the `ObserveFn`. Otherwise, the reactivity will be lost. Use `toValue` or `toValues` to convert elements of the collection to instances of `Observed` instead.
 
@@ -271,7 +273,6 @@ class Component {
 ### Sponsors
 
 [![volosoft](https://user-images.githubusercontent.com/34455572/115241777-dc7f6680-a129-11eb-8318-4f3c811547e8.png)](https://volosoft.com/)
-
 
 <hr />
 
