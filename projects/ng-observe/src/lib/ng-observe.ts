@@ -1,5 +1,12 @@
-import type { OnDestroy } from '@angular/core';
-import { ChangeDetectorRef, Inject, Injectable, InjectionToken } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Inject,
+  Injectable,
+  InjectionToken,
+  NgZone,
+  OnDestroy,
+  Optional,
+} from '@angular/core';
 import { isObservable, Observable, Subscription } from 'rxjs';
 
 export const HASH_FN = new InjectionToken<HashFn>('HASH_FN', {
@@ -13,7 +20,7 @@ const BRAND = '__ngObserve__';
 @Injectable()
 export class ObserveService implements OnDestroy {
   private hooks = new Map<string | number, () => void>();
-  private noop = () => {};
+  private detectChanges = () => this.cdRef.detectChanges();
 
   collection: ObserveCollectionFn = (sources, options = {} as any) => {
     const sink: any = Array.isArray(sources) ? [] : {};
@@ -44,7 +51,15 @@ export class ObserveService implements OnDestroy {
     return toValue(sink, 'value');
   };
 
-  constructor(private cdRef: ChangeDetectorRef, @Inject(HASH_FN) private hash: HashFn) {}
+  constructor(
+    private cdRef: ChangeDetectorRef,
+    @Inject(HASH_FN) private hash: HashFn,
+    @Optional() zone: NgZone
+  ) {
+    if (zone instanceof NgZone) {
+      this.detectChanges = () => this.cdRef.markForCheck();
+    }
+  }
 
   private createUniqueId(key: string | number | symbol): string {
     try {
@@ -61,9 +76,10 @@ export class ObserveService implements OnDestroy {
       { uniqueId = this.createUniqueId(key), errorHandler = () => {} }: ObserveValueOptions = {}
     ) => {
       let subscription = new Subscription();
+      const noop = () => {};
       const unsubscribe = () => subscription.unsubscribe();
       const complete = () => {
-        (this.hooks.get(uniqueId) || this.noop)();
+        (this.hooks.get(uniqueId) || noop)();
         this.hooks.delete(uniqueId);
       };
 
@@ -74,7 +90,7 @@ export class ObserveService implements OnDestroy {
       subscription = source.subscribe({
         next: x => {
           sink[key] = x;
-          this.cdRef.markForCheck();
+          this.detectChanges();
         },
         error: errorHandler,
         complete,
@@ -133,21 +149,15 @@ type Observe = <Value>(
 
 export type ObservableCollection<Collection> = Collection extends Array<infer Value>
   ? Array<Observable<Value>>
-  : {
-      [Key in keyof Collection]: Observable<Collection[Key]>;
-    };
+  : { [Key in keyof Collection]: Observable<Collection[Key]> };
 
 export type ObserveCollectionOptions<Collection> = Collection extends Array<any>
   ? Array<ObserveValueOptions>
-  : {
-      [Key in keyof Collection]?: ObserveValueOptions;
-    };
+  : { [Key in keyof Collection]?: ObserveValueOptions };
 
 export type ObservedValues<Collection> = Collection extends Array<infer Value>
   ? Array<Observed<Value>>
-  : {
-      [Key in keyof Collection]: Observed<Collection[Key]>;
-    };
+  : { [Key in keyof Collection]: Observed<Collection[Key]> };
 
 export interface ObserveValueOptions {
   errorHandler?: (err: any) => void;

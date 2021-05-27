@@ -173,3 +173,5 @@ describe('Observe Collection', () => {
     expect(service['hooks'].size).toBe(1);
   });
 });
+
+// Could not find a way to test zoneless implementation yet
