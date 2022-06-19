@@ -64,7 +64,7 @@ export class ObserveService implements OnDestroy {
   private createUniqueId(key: string | number | symbol): string {
     try {
       throw new Error();
-    } catch (e) {
+    } catch (e: any) {
       return String(this.hash(e.stack + String(key)));
     }
   }
