@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, Injector } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, inject, TestBed } from '@angular/core/testing';
 import { BehaviorSubject, Observable, of } from 'rxjs';
+import { provideDestroyHooks } from './destroy-hooks';
 import {
+  injectObserveFn,
   isCollection,
   OBSERVE,
   Observed,
@@ -20,8 +22,8 @@ import {
 })
 export class ValueTestComponent {
   observe: ObserveFn;
-  text: Observed<string>;
   text$ = new BehaviorSubject('Foo');
+  text: Observed<string>;
 
   constructor(public readonly injector: Injector) {
     this.observe = injector.get(OBSERVE);
@@ -88,10 +90,10 @@ describe('Observe Value', () => {
 })
 export class CollectionTestComponent {
   observe: ObserveFn;
-  state: { text: string };
-  text!: Observed<string>;
-  firstCharCode!: Observed<number>;
   text$ = new BehaviorSubject('Foo');
+  text!: Observed<string>;
+  state: { text: string };
+  firstCharCode!: Observed<number>;
   values!: { text: Observed<string> };
 
   constructor(public readonly injector: Injector) {
@@ -171,6 +173,50 @@ describe('Observe Collection', () => {
     });
 
     expect(service['hooks'].size).toBe(1);
+  });
+});
+
+@Component({
+  template: `{{ text.value }} : {{ state.text }}`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideDestroyHooks()],
+})
+export class InjectTestComponent {
+  observe = injectObserveFn();
+  text$ = new BehaviorSubject('Foo');
+  text = this.observe(this.text$);
+  state = this.observe({ text: this.text$ });
+}
+
+describe('injectObserveFn', () => {
+  let component: InjectTestComponent;
+  let fixture: ComponentFixture<InjectTestComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [InjectTestComponent],
+    }).compileComponents();
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(InjectTestComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should inject observe fn', () => {
+    expect(isCollection(component.state)).toBe(true);
+    expect(component.text instanceof Observed).toBe(true);
+
+    expect(component.state.text).toBe('Foo');
+    expect(component.text.value).toBe('Foo');
+    expect(fixture.nativeElement.textContent).toBe('Foo : Foo');
+
+    component.text$.next('Qux');
+    fixture.detectChanges();
+    expect(component.state.text).toBe('Qux');
+    expect(component.text.value).toBe('Qux');
+    expect(fixture.nativeElement.textContent).toBe('Qux : Qux');
   });
 });
 

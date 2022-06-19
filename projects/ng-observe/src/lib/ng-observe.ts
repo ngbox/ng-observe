@@ -1,27 +1,21 @@
 import {
   ChangeDetectorRef,
-  Inject,
+  inject,
   Injectable,
   InjectionToken,
+  Injector,
   NgZone,
-  OnDestroy,
-  Optional,
 } from '@angular/core';
 import { isObservable, Observable, Subscription } from 'rxjs';
-
-export const HASH_FN = new InjectionToken<HashFn>('HASH_FN', {
-  providedIn: 'root',
-  factory: createHashFn,
-});
+import { HASH_FN, HashFn } from './hash-fn';
+import { DestroyHooks, DESTROY_HOOKS } from './destroy-hooks';
 
 const BRAND = '__ngObserve__';
+const noop = () => {};
 
 // @dynamic
 @Injectable()
-export class ObserveService implements OnDestroy {
-  private hooks = new Map<string | number, () => void>();
-  private detectChanges = () => this.cdRef.detectChanges();
-
+export class ObserveService {
   collection: ObserveCollectionFn = (sources, options = {} as any) => {
     const sink: any = Array.isArray(sources) ? [] : {};
     Object.defineProperty(sink, BRAND, {
@@ -51,32 +45,41 @@ export class ObserveService implements OnDestroy {
     return toValue(sink, 'value');
   };
 
-  constructor(
-    private cdRef: ChangeDetectorRef,
-    @Inject(HASH_FN) private hash: HashFn,
-    @Optional() zone: NgZone
-  ) {
-    if (zone instanceof NgZone) {
-      this.detectChanges = () => this.cdRef.markForCheck();
-    }
+  protected hash: HashFn;
+  protected hooks: DestroyHooks;
+  protected detectChanges: () => void;
+
+  constructor(injector: Injector) {
+    this.hash = injector.get(HASH_FN);
+    this.hooks = injector.get(DESTROY_HOOKS, new Map());
+    const cdRef = injector.get(ChangeDetectorRef);
+    const zone = injector.get(NgZone, null);
+
+    this.detectChanges = zone ? () => cdRef.markForCheck() : () => cdRef.detectChanges();
   }
 
-  private createUniqueId(key: string | number | symbol): string {
+  ngOnDestroy() {
+    this.hooks.forEach(fn => fn());
+  }
+
+  protected createUniqueId(key: string | number | symbol): string {
     try {
       throw new Error();
     } catch (e: any) {
-      return String(this.hash(e.stack + String(key)));
+      const [stack] = e.stack.split(
+        'rememberChangeHistoryAndInvokeOnChangesHook' // the initial call differs from the rest
+      );
+      return BRAND + String(this.hash(stack + String(key)));
     }
   }
 
-  private observe(sink: any): Observe {
+  protected observe(sink: any): Observe {
     const fn = <Value>(
       key: string | number | symbol,
       source: Observable<Value>,
       { uniqueId = this.createUniqueId(key), errorHandler = () => {} }: ObserveValueOptions = {}
     ) => {
       let subscription = new Subscription();
-      const noop = () => {};
       const unsubscribe = () => subscription.unsubscribe();
       const complete = () => {
         (this.hooks.get(uniqueId) || noop)();
@@ -86,7 +89,6 @@ export class ObserveService implements OnDestroy {
       complete();
       this.hooks.set(uniqueId, unsubscribe);
 
-      // tslint:disable-next-line: deprecation
       subscription = source.subscribe({
         next: x => {
           sink[key] = x;
@@ -99,13 +101,14 @@ export class ObserveService implements OnDestroy {
 
     return fn;
   }
-
-  ngOnDestroy(): void {
-    this.hooks.forEach(unsubscribe => unsubscribe());
-  }
 }
 
 export const OBSERVE = new InjectionToken<ObserveFn>('OBSERVE');
+
+export function injectObserveFn() {
+  const injector = inject(Injector);
+  return observeFactory(new ObserveService(injector));
+}
 
 export const OBSERVE_PROVIDER = [
   ObserveService,
@@ -186,38 +189,6 @@ export class Observed<Value, Seed = unknown> {
   get value(): Value {
     return this.getter();
   }
-}
-
-export type HashFn = (input: string) => number;
-
-export function createHashFn(): HashFn {
-  const k = 2654435761;
-  const shift = Math.imul ? (n: number) => Math.imul(n, k) : (n: number) => imul(n, k);
-
-  const hashFn = (input: string) => {
-    let index = input.length;
-    let hash = 0xabadcafe;
-
-    while (index--) {
-      hash = shift(hash ^ input.charCodeAt(index));
-    }
-
-    return (hash ^ (hash >>> 16)) >>> 0;
-  };
-
-  return hashFn;
-}
-
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/imul
-export function imul(a: number, b: number): number {
-  b |= 0;
-
-  let result = (a & 0x003fffff) * b;
-  if (a & 0xffc00000) {
-    result += ((a & 0xffc00000) * b) | 0;
-  }
-
-  return result | 0;
 }
 
 export function isCollection(source: any): boolean {
