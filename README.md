@@ -21,7 +21,7 @@ Angular reactivity streamlined...
 - Extracts emitted value from observables.
 - Marks the component for change detection.
 - Leaves no subscription behind.
-- Clears old subscriptions and creates new ones at each execution if used in getters, setters or methods.
+- Clears old subscriptions and creates new ones at each execution if used in getters, setters or methods (e.g. `ngOnChanges`).
 
 ### How to use
 
@@ -71,6 +71,48 @@ class DemoComponent {
   }
 
   constructor(@Inject(OBSERVE) private observe: ObserveFn) {}
+}
+```
+
+As of Angular 14, you can use ng-observe with the `inject` function.
+
+```typescript
+import { OBSERVE, OBSERVE_PROVIDER } from 'ng-observe';
+
+@Component({
+  template: '{{ fooBar }}',
+  providers: [OBSERVE_PROVIDER],
+})
+class DemoComponent {
+  private observe = inject(OBSERVE);
+
+  foo = this.observe(of('foo'));
+
+  get fooBar() {
+    return this.foo.value + 'bar';
+  }
+}
+```
+
+<!-- TODO: Update here when provideDestroyHooks is moved to a separate library -->
+
+We have introduced a utility inject function called `injectObserveFn` which also works when the component provides the destroy hook with the `provideDestroyHooks` function. In that case you do not have to provide the `OBSERVE_PROVIDER`.
+
+```typescript
+import { provideDestroyHooks, injectObserveFn } from 'ng-observe';
+
+@Component({
+  template: '{{ fooBar }}',
+  providers: [provideDestroyHooks()],
+})
+class DemoComponent {
+  private observe = injectObserveFn();
+
+  foo = this.observe(of('foo'));
+
+  get fooBar() {
+    return this.foo.value + 'bar';
+  }
 }
 ```
 
