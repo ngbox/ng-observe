@@ -180,14 +180,17 @@ export type ObserveFnReturnValue<Source> = Source extends Observable<infer Value
   : never;
 
 export class Observed<Value, Seed = unknown> {
-  private readonly getter: () => Value;
+  readonly #seed: Seed;
 
-  constructor(private readonly seed: Seed, mapFn: (source: typeof seed) => Value) {
-    this.getter = () => mapFn(this.seed);
+  readonly #getter: () => Value;
+
+  constructor(seed: Seed, mapFn: (source: typeof seed) => Value) {
+    this.#seed = seed;
+    this.#getter = () => mapFn(this.#seed);
   }
 
   get value(): Value {
-    return this.getter();
+    return this.#getter();
   }
 }
 
